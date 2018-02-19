@@ -205,7 +205,7 @@ router.post('/update', function(req, res) {
             'rf_OrganId = ' + data.organId +
             ', RegNumber = \'' + data.regNumber + '\'' +
             ', LicenseNumber = \'' + data.licenseNumber + '\'' +
-            ', DateDecision = ' + data.dateDecision +
+            ', DateDecision = \'' + data.dateDecision + '\'' +
             ', LicensePeriod = \'' + data.licensePeriod + '\'' +
             ', LicenseEdProgramm = \'' + data.licenseEdProgramm + '\'' +
             ', NumberDateOrder = \'' + data.numberDateOrder + '\'' +
