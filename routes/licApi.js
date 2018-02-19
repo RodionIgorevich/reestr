@@ -42,7 +42,7 @@ function doConnect() {
 }
 
 doConnect();
-console.log('licApi');
+console.log('lic api');
 
 router.get('/search/count', function(req, res){
     var data = JSON.parse(req.query.data);
