@@ -162,11 +162,11 @@ router.post('/update', function(req, res) {
 
     if (data.id > 0) {
         var query1 = 'update accreditations set ' +
-            'rf_OrganId = \'' + data.organId + '\'' +
+            'rf_OrganId = ' + data.organId +
             ', Requisites = \'' + data.accNumber + '\'' +
             ', DateDecision = ' + data.dateDecision +
             ', AccEnd = \'' + data.accEnd + '\'' +
-            ', rf_MainOrganId = \'' + data.nameAuthority + '\'' +
+            ', rf_MainOrganId = ' + data.nameAuthority +
             ' Where AccId = ' + data.id;
 
         console.log(query1);
