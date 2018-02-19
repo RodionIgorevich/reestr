@@ -202,18 +202,18 @@ router.post('/update', function(req, res) {
 
     if (data.id > 0) {
         var query1 = 'update licenses set ' +
-            'rf_OrganId = \'' + data.organId + '\'' +
+            'rf_OrganId = ' + data.organId +
             ', RegNumber = \'' + data.regNumber + '\'' +
             ', LicenseNumber = \'' + data.licenseNumber + '\'' +
             ', DateDecision = ' + data.dateDecision +
             ', LicensePeriod = \'' + data.licensePeriod + '\'' +
             ', LicenseEdProgramm = \'' + data.licenseEdProgramm + '\'' +
             ', NumberDateOrder = \'' + data.numberDateOrder + '\'' +
-            ', rf_MainOrganId = \'' + data.nameAuthority + '\'' +
+            ', rf_MainOrganId = ' + data.nameAuthority +
             ' Where LicenseId = ' + data.id;
 
          var query2 = 'update lic_dates_registry set ' +
-             'rf_OrganId = \'' + data.organId + '\'' +
+             'rf_OrganId = ' + data.organId +
              ', Dates = \'' + data.dates + '\'' +
              ' Where LicenseId = ' + data.id;
 
