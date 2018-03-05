@@ -3,13 +3,15 @@ var router = express.Router();
 var mysql = require('mysql');
 var bodyParser = require('body-parser');
 var config      = require('../config');
+var multer  = require('multer');
 
 router.use(bodyParser.urlencoded({extended: true}));
 router.use(bodyParser.json());
 
 router.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Origin", "http://localhost:4200");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header('Access-Control-Allow-Credentials', true);
     next();
 });
 
@@ -26,13 +28,13 @@ function doConnect() {
     con = mysql.createConnection(db_config);
     con.connect(function(err) {
         if(err) {
-            console.log(err);
+            //console.log(err);
             setTimeout(doConnect, 2000);
         }
     });
 
     con.on('error', function(err) {
-        console.log('db error', err);
+        //console.log('db error', err);
         if(err.code === 'PROTOCOL_CONNECTION_LOST') {
             doConnect();
         } else {
@@ -42,7 +44,7 @@ function doConnect() {
 }
 
 doConnect();
-console.log('lic api');
+console.log('licApi');
 
 router.get('/search/count', function(req, res){
     var data = JSON.parse(req.query.data);
@@ -205,8 +207,8 @@ router.post('/update', function(req, res) {
             'rf_OrganId = ' + data.organId +
             ', RegNumber = \'' + data.regNumber + '\'' +
             ', LicenseNumber = \'' + data.licenseNumber + '\'' +
-            ', DateDecision = \'' + data.dateDecision + '\'' +
-            ', LicensePeriod = \'' + data.licensePeriod + '\'' +
+            ', DateDecision = STR_TO_DATE(\'' + data.dateDecision + '\', \'%d.%m.%Y\')' +
+            ', LicensePeriod = STR_TO_DATE(\'' + data.licensePeriod + '\', \'%d.%m.%Y\')' +
             ', LicenseEdProgramm = \'' + data.licenseEdProgramm + '\'' +
             ', NumberDateOrder = \'' + data.numberDateOrder + '\'' +
             ', rf_MainOrganId = ' + data.nameAuthority +
@@ -248,10 +250,31 @@ router.post('/delete', function(req, res) {
             // con.query(query2, function (err, result) {
             //     console.log(result);
             //     console.log(err);
-                 res.send(result);
+            res.send(result);
             // });
         });
     }
+});
+
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname);
+    }
+});
+
+var upload = multer({ storage: storage }).single('file');
+
+router.post('/upload', function(req, res) {
+    upload(req,res,function(err){
+        console.log(req.file);
+        if (err) {
+            res.send(err);
+        }
+        res.json({error_code:0,err_desc:null});
+    });
 });
 
 module.exports = router;

@@ -20,6 +20,13 @@ app.use('/api', shared);
 app.use('/api/lic', lic);
 app.use('/api/acc', acc);
 
+app.use('/download', function(req, res) {
+    console.log(__dirname);
+    var file = __dirname + req.originalUrl.replace('download', 'uploads');
+    console.log(file);
+    res.download(file);
+});
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

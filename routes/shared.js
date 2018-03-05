@@ -26,13 +26,13 @@ function doConnect() {
     con = mysql.createConnection(db_config);
     con.connect(function(err) {
         if (err) {
-            console.log(err);
+            //console.log(err);
             setTimeout(doConnect, 2000);
         }
     });
 
     con.on('error', function(err) {
-        console.log('db error', err);
+        //console.log('db error', err);
         if (err.code === 'PROTOCOL_CONNECTION_LOST') {
             doConnect();
         } else {
