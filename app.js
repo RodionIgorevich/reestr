@@ -7,6 +7,7 @@ var index = require('./routes/index');
 var shared = require('./routes/shared');
 var lic = require('./routes/licApi');
 var acc = require('./routes/accApi');
+var suggestions = require('./routes/suggestions');
 
 var app = express();
 
@@ -19,6 +20,7 @@ app.use('/', index);
 app.use('/api', shared);
 app.use('/api/lic', lic);
 app.use('/api/acc', acc);
+app.use('/suggestions', suggestions);
 
 app.use('/download', function(req, res) {
     console.log(__dirname);
