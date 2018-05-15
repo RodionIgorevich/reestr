@@ -9,7 +9,7 @@ router.use(bodyParser.urlencoded({extended: true}));
 router.use(bodyParser.json());
 
 router.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://justfortest.gq");
+    res.header("Access-Control-Allow-Origin", "http://localhost:4200");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header('Access-Control-Allow-Credentials', true);
     next();
@@ -158,14 +158,13 @@ router.get('/info/:number', function(req, res) {
 });
 
 router.post('/add', function(req, res) {
-    var resp = '0';
     var data = req.body.params;
 
     console.log(data);
 
-    var query1 = 'insert into licenses (rf_OrganId, RegNumber, LicenseNumber, DateDecision, LicensePeriod, LicenseEdProgramm, NumberDateOrder, rf_MainOrganId) ' +
+    var query = 'insert into licenses (rf_OrganId, RegNumber, LicenseNumber, DateDecision, LicensePeriod, LicenseEdProgramm, NumberDateOrder, rf_MainOrganId) ' +
         'values ( ? )';
-    var values1 = [
+    var values = [
         data.organId,
         data.regNumber,
         data.licenseNumber,
@@ -175,21 +174,45 @@ router.post('/add', function(req, res) {
         data.numberDateOrder,
         data.nameAuthority
     ];
-    // var query2 = 'insert into lic_dates_registry (rf_OrganId, Dates) ' +
-    //     'values ( ? )';
-    // var values2 = [
-    //     data.organId,
-    //     data.dates
-    // ];
+    var queryDates = 'insert into lic_dates_registry (rf_OrganId, Dates) ' +
+        'values ( ? )';
+    var dates = [
+        data.organId,
+        data.dates
+    ];
+
+    var queryGetAddress = 'select m.MunicipalityName, o.PostIndex, o.SettlementName, o.Street, o.Building from organizations o, municipalities m ' +
+        'where m.MunicipalityId = o.rf_MunicipalityId ' +
+        'and o.OrganId = ' + data.organId;
     
     if ( data.organId > 0) {
-        con.query(query1, [values1], function (err, result) {
+        con.query(query, [values], function (err, result) {
             console.log(result);
 
-            // con.query(query2, [values2], function (err, result) {
-            //     console.log(err);
-                 res.send(result);
-            // });
+            con.query(queryGetAddress, function (err, result) {
+                var getAddress = result[0];
+                var settlement = getAddress.SettlementName ? getAddress.SettlementName : '';
+                var address = getAddress.PostIndex + ', Белгородская область, ' + getAddress.MunicipalityName +
+                    ', ' + settlement + ', ' + getAddress.Street + ', ' + getAddress.Building;
+                console.log(address);
+
+                var queryAddress = 'insert into address_lic_activity (rf_OrganId, Address) ' +
+                    'values ( ? )';
+                var values = [
+                    data.organId,
+                    address
+                ];
+
+                con.query(queryDates, [dates], function (err, result) {
+                    console.log(err);
+                    console.log(result);
+                    con.query(queryAddress, [values], function (err, result) {
+                        console.log(err);
+                        console.log(result);
+                        res.send(result);
+                    });
+                });
+            });
         });
     } else {
         res.send('error');
@@ -215,18 +238,17 @@ router.post('/update', function(req, res) {
             ' Where LicenseId = ' + data.id;
 
          var query2 = 'update lic_dates_registry set ' +
-             'rf_OrganId = ' + data.organId +
-             ', Dates = \'' + data.dates + '\'' +
-             ' Where LicenseId = ' + data.id;
+             'Dates = \'' + data.dates + '\'' +
+             ' Where rf_OrganId = ' + data.organId;
 
         console.log(query1);
         con.query(query1, function (err, result) {
             console.log(result);
             console.log(err);
-            // con.query(query2, [values2], function (err, result) {
-            //     console.log(err);
+            con.query(query2, function (err, result) {
+                console.log(err);
                  res.send(result);
-            // });
+            });
         });
     } else {
         res.send('error');
@@ -236,22 +258,20 @@ router.post('/update', function(req, res) {
 router.post('/delete', function(req, res) {
     var data = req.body.params;
 
-    console.log(data);
-
-    if (data > 0) {
-        var query1 = 'delete from licenses where LicenseId  =  ' + data;
-        var query2 = 'delete from lic_dates_registry where rf_LicenseId  =  ' + data;
+    if (data.id > 0) {
+        var query1 = 'delete from licenses where LicenseId  =  ' + data.id;
+        var query2 = 'delete from lic_dates_registry where rf_OrganId = ' + data.organId;
 
         console.log(query1);
         con.query(query1, function (err, result) {
             console.log(result);
             console.log(err);
 
-            // con.query(query2, function (err, result) {
-            //     console.log(result);
-            //     console.log(err);
+            con.query(query2, function (err, result) {
+                console.log(result);
+                console.log(err);
             res.send(result);
-            // });
+            });
         });
     }
 });

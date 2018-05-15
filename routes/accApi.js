@@ -183,10 +183,10 @@ router.post('/update', function(req, res) {
 router.post('/delete', function(req, res) {
     var data = req.body.params;
 
-    console.log(data);
+    console.log(data.id);
 
-    if (data > 0) {
-        var query1 = 'delete from accreditations where AccId  =  ' + data;
+    if (data.id > 0) {
+        var query1 = 'delete from accreditations where AccId  =  ' + data.id;
 
         console.log(query1);
         con.query(query1, function (err, result) {

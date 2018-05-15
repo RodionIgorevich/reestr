@@ -47,11 +47,15 @@ console.log('api');
 
 router.get('/district', function(req, res) {
     con.query('select * from municipalities order by MunicipalityType', function (err, result) {
-      result.unshift({
-          MunicipalityId: '',
-          MunicipalityName: 'Все',
-          MunicipalityType: ''});
-        res.send(result);
+        if (result) {
+            result.unshift({
+                MunicipalityId: '',
+                MunicipalityName: 'Все',
+                MunicipalityType: ''});
+            res.send(result);
+        } else {
+            res.send(err);
+        }
     });
 });
 
@@ -266,13 +270,18 @@ router.post('/delete', function(req, res) {
 
     console.log(data);
 
-    if (data > 0) {
-        var query = 'delete from organizations where OrganId =  ' + data;
+    if (data.id > 0) {
+        var query = 'delete from organizations where OrganId =  ' + data.id;
+        // var query2 = 'delete from lic_dates_registry where rf_OrganId = ' + data.id;
         console.log(query);
         con.query(query, function (err, result) {
             console.log(result);
             console.log(err);
-            res.send(result);
+            // con.query(query2, function (err, result) {
+            //     console.log(result);
+            //     console.log(err);
+                res.send(result);
+            // });
         });
     }
 });
