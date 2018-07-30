@@ -276,6 +276,67 @@ router.post('/delete', function(req, res) {
     }
 });
 
+router.get('/chart/count', function(req, res) {
+    var data = JSON.parse(req.query.data);
+
+    if (data > 0) {
+        var resp = {'allLics': 0, 'activeLics': 0, 'epicLics': 0, 'endLics': 0};
+        var allLicsQuery = 'select count(*) as allLics from licenses l ' +
+            'left join organizations o on l.rf_OrganId = o.OrganId ' +
+            'left join municipalities m on o.rf_MunicipalityId = m.MunicipalityId ' +
+            'Where l.LicenseId > 0 ' +
+            // 'And LicensePeriod < \'' + new Date().toISOString() + '\' ' +
+            'And m.MunicipalityId = ' + data;
+
+        var activeLicsQuery = 'select count(*) as activeLics from licenses l ' +
+            'left join organizations o on l.rf_OrganId = o.OrganId ' +
+            'left join municipalities m on o.rf_MunicipalityId = m.MunicipalityId ' +
+            'Where l.LicenseId > 0 And m.MunicipalityId = ' + data;
+        var epicLicsQuery = 'select 0 as epicLics';
+        var endLicsQuery = 'select 0 as endLics';
+
+        console.log(allLicsQuery);
+
+        con.query(allLicsQuery, function (err, result) {
+            if (result) {
+                resp.allLics = (result[0]['allLics']);
+                con.query(activeLicsQuery, function (err, result) {
+                    if (result) {
+                        resp.activeLics = (result[0]['activeLics']);
+                        console.log(resp);
+                        con.query(epicLicsQuery, function (err, result) {
+                            if (result) {
+                                resp.epicLics = (result[0]['epicLics']);
+                                con.query(endLicsQuery, function (err, result) {
+                                    if (result) {
+                                        resp.endLics = (result[0]['endLics']);
+                                        console.log(resp);
+                                        res.send(resp);
+                                    } else {
+                                        console.log(err);
+                                        res.send('error');
+                                    }
+                                });
+                            } else {
+                                console.log(err);
+                                res.send('error');
+                            }
+                        });
+                    } else {
+                        console.log(err);
+                        res.send('error');
+                    }
+                });
+            } else {
+                console.log(err);
+                res.send('error');
+            }
+        });
+    } else {
+        res.send('error');
+    }
+});
+
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, './uploads/');

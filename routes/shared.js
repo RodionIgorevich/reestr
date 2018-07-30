@@ -3,6 +3,7 @@ var router = express.Router();
 var mysql = require('mysql');
 var bodyParser = require('body-parser');
 var config = require('../config');
+var jsonfile = require('jsonfile');
 
 router.use(bodyParser.urlencoded({extended: true}));
 router.use(bodyParser.json());
@@ -44,6 +45,22 @@ function doConnect() {
 doConnect();
 console.log('api');
 
+router.get('/config', function(req, res) {
+    var file = 'config.json';
+    jsonfile.readFile(file, function(err, obj) {
+        console.dir(obj);
+        res.send(obj)
+    });
+});
+
+router.post('/addConfig', function(req, res) {
+    var data = req.body.params;
+    var file = 'config.json';
+    console.log(data);
+    jsonfile.writeFile(file, data, function(err, obj) {
+        res.send(data)
+    });
+});
 
 router.get('/district', function(req, res) {
     con.query('select * from municipalities order by MunicipalityType', function (err, result) {
@@ -54,6 +71,19 @@ router.get('/district', function(req, res) {
                 MunicipalityType: ''});
             res.send(result);
         } else {
+            console.log(err);
+            res.send(err);
+        }
+    });
+});
+
+router.get('/districtCount', function(req, res) {
+    con.query('select m.MunicipalityId, m.MunicipalityName,' +
+        ' count(o.OrganId) as count from organizations o join municipalities m on m.MunicipalityId = o.rf_MunicipalityId group by m.MunicipalityName order by count desc', function (err, result) {
+        if (result) {
+            res.send(result);
+        } else {
+            console.log(err);
             res.send(err);
         }
     });
@@ -128,6 +158,7 @@ router.get('/lic', function(req, res) {
         }
     }
 
+    query += " ORDER BY l.DateDecision ";
     if (take > 0 || skip > 0) {
         query = query + ' Limit ' + skip + ', ' + take;
     }
@@ -164,6 +195,7 @@ router.get('/acc', function(req, res) {
         }
     }
 
+    query += " ORDER BY acc.DateDecision ";
     if (take > 0 || skip > 0) {
         query = query + ' Limit ' + skip + ', ' + take;
     }
@@ -267,8 +299,6 @@ router.post('/update', function(req, res) {
 
 router.post('/delete', function(req, res) {
     var data = req.body.params;
-
-    console.log(data);
 
     if (data.id > 0) {
         var query = 'delete from organizations where OrganId =  ' + data.id;

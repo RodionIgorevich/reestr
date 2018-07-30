@@ -197,4 +197,77 @@ router.post('/delete', function(req, res) {
     }
 });
 
+router.get('/chart/count', function(req, res) {
+    var data = JSON.parse(req.query.data);
+
+    if (data > 0) {
+        var resp = {'allAccs': 0, 'activeAccs': 0, 'epicAccs': 0, 'endAccs': 0};
+
+        var allAccsQuery = 'select count(*) as allAccs from accreditations ac ' +
+            'left join organizations o on ac.rf_OrganId = o.OrganId ' +
+            'left join municipalities m on o.rf_MunicipalityId = m.MunicipalityId ' +
+            'Where ac.AccId > 0 ' +
+            'And m.MunicipalityId = ' + data;
+        var activeAccsQuery = 'select count(*) as activeAccs from accreditations ac ' +
+            'left join organizations o on ac.rf_OrganId = o.OrganId ' +
+            'left join municipalities m on o.rf_MunicipalityId = m.MunicipalityId ' +
+            'Where ac.AccId > 0 ' +
+            'And ac.AccEnd > NOW() ' +
+            'And m.MunicipalityId = ' + data;
+        var epicAccsQuery = 'select  count(*) as epicAccs from accreditations ac ' +
+            'left join organizations o on ac.rf_OrganId = o.OrganId ' +
+            'left join municipalities m on o.rf_MunicipalityId = m.MunicipalityId ' +
+            'Where ac.AccId > 0 ' +
+            'And ac.AccEnd > NOW() ' +
+            'And ac.AccEnd < NOW() + INTERVAL 1 MONTH ' +
+            'And m.MunicipalityId = ' + data;
+        var endAccsQuery = 'select count(*) as endAccs from accreditations ac ' +
+            'left join organizations o on ac.rf_OrganId = o.OrganId ' +
+            'left join municipalities m on o.rf_MunicipalityId = m.MunicipalityId ' +
+            'Where ac.AccId > 0 ' +
+            'And ac.AccEnd < NOW() ' +
+            'And m.MunicipalityId = ' + data;
+
+        console.log(activeAccsQuery);
+
+        con.query(allAccsQuery, function (err, allAccsResult) {
+            if (allAccsResult) {
+                resp.allAccs = (allAccsResult[0]['allAccs']);
+                con.query(activeAccsQuery, function (err, activeAccsResult) {
+                    if (activeAccsResult) {
+                        resp.activeAccs = (activeAccsResult[0]['activeAccs']);
+                        console.log(resp);
+                        con.query(epicAccsQuery, function (err, epicAccsResult) {
+                            if (epicAccsResult) {
+                                resp.epicAccs = (epicAccsResult[0]['epicAccs']);
+                                con.query(endAccsQuery, function (err, result) {
+                                    if (result) {
+                                        resp.endAccs = (result[0]['endAccs']);
+                                        console.log(resp);
+                                        res.send(resp);
+                                    } else {
+                                        console.log(err);
+                                        res.send('error');
+                                    }
+                                });
+                            } else {
+                                console.log(err);
+                                res.send('error');
+                            }
+                        });
+                    } else {
+                        console.log(err);
+                        res.send('error');
+                    }
+                });
+            } else {
+                console.log(err);
+                res.send('error');
+            }
+        });
+    } else {
+        res.send('error');
+    }
+});
+
 module.exports = router;
