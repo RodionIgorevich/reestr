@@ -1,8 +1,8 @@
 {
-  "host": "us-cdbr-iron-east-05.cleardb.net",
-  "user": "b2611502a420ac",
+  "host": "justfortest.gq",
+  "user": "f0198787_heroku",
   "password": "fc01cca8",
-  "database": "heroku_f6bbb6db75e7b25",
+  "database": "f0198787_heroku",
 
   "icon":"assets/favicon.ico",
   "title":"Реестр лицензий",
