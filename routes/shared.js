@@ -53,7 +53,7 @@ router.get('/config', function(req, res) {
     });
 });
 
-router.post('/addconfig', function(req, res) {
+router.post('/addConfig', function(req, res) {
     var data = req.body.params;
     var file = 'config.json';
     console.log(data);
